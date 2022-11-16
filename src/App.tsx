@@ -1,24 +1,42 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import { useState } from "react";
+import styled from "styled-components";
+
+const Input = styled.input.attrs({ type: "file", accept: ".jpg, .jepg, .png " })``;
 
 function App() {
+  const [image, setImage] = useState<any>();
+  const [reader] = useState<any>(new FileReader());
+
+  const onImageChange = (a: any) => {
+    const WIDTH = 200;
+    reader.readAsDataURL(a.target.files[0]);
+
+    reader.onload = (event: any) => {
+      setImage(event.target.result);
+
+      const imageSRC = document.createElement("img");
+      imageSRC.src = image;
+
+      imageSRC.onload = (e: any) => {
+        let canvas = document.createElement("canvas");
+        let ratio = WIDTH / e.target.width;
+        canvas.width = WIDTH;
+        canvas.height = e.target.height * ratio;
+
+        const context = canvas.getContext("2d");
+        context?.drawImage(imageSRC, 0, 0, canvas.width, canvas.height);
+
+        const new_image_url: any = context?.canvas.toDataURL("image/jpeg", 1);
+        const new_image = document.createElement("img");
+        new_image.src = new_image_url;
+        document.getElementById("wrapper")?.appendChild(new_image);
+      };
+    };
+  };
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <Input onChange={onImageChange} />
+      <div id="wrapper"></div>
     </div>
   );
 }
